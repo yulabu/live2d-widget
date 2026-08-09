@@ -3,10 +3,17 @@
  * https://github.com/stevenjoezhang/live2d-widget
  */
 
-// Recommended to use absolute path for live2d_path parameter
-// live2d_path 参数建议使用绝对路径
-const live2d_path = 'https://fastly.jsdelivr.net/gh/yulabu/live2d-widget@master/dist/';
-// const live2d_path = '/dist/';
+// Automatically detect base path from script URL
+// Works both locally (e.g. /dist/) and on CDN (jsDelivr)
+const live2d_path = (() => {
+  const src = document.currentScript.src;
+  return src.substring(0, src.lastIndexOf('/') + 1);
+})();
+const repoBase = (() => {
+  const src = document.currentScript.src;
+  const idx = src.indexOf('/dist/');
+  return idx >= 0 ? src.substring(0, idx) : '';
+})();
 
 // Method to encapsulate asynchronous resource loading
 // 封装异步加载资源的方法
@@ -56,8 +63,23 @@ function loadExternalResource(url, type) {
   // 配置选项的具体用法见 README.md
   localStorage.removeItem('modelId');
   localStorage.removeItem('modelTexturesId');
+
+  // Fetch waifu-tips.json and resolve model paths relative to repo base
+  let waifuPath = live2d_path + 'waifu-tips.json';
+  if (repoBase) {
+    const resp = await fetch(waifuPath);
+    const tips = await resp.json();
+    if (tips.models) {
+      tips.models.forEach(m => {
+        m.paths = m.paths.map(p => p.startsWith('/') ? repoBase + p : p);
+      });
+    }
+    const blob = new Blob([JSON.stringify(tips)], { type: 'application/json' });
+    waifuPath = URL.createObjectURL(blob);
+  }
+
   initWidget({
-    waifuPath: live2d_path + 'waifu-tips.json',
+    waifuPath: waifuPath,
     // cdnPath: 'https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/',
     cubism2Path: live2d_path + 'live2d.min.js',
     cubism5Path: 'https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js',

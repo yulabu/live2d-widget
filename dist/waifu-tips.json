@@ -257,7 +257,7 @@
   },
   "models": [{
     "name": "Nahida",
-    "paths": ["https://fastly.jsdelivr.net/gh/yulabu/live2d-widget@master/model/Nahida/Nahida.model3.json"],
+    "paths": ["/model/Nahida/Nahida.model3.json"],
     "message": "纳西妲 ~"
   }, {
     "name": "Potion-Maker/Pio",
