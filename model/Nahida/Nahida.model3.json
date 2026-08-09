@@ -67,5 +67,10 @@
 			]
 		}
 	],
-	"HitAreas": []
+	"HitAreas": [
+		{
+			"Id": "HitArea",
+			"Name": "Body"
+		}
+	]
 }
