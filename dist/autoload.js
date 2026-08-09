@@ -92,9 +92,7 @@ function loadExternalResource(url, type) {
     cubism2Path: live2d_path + 'live2d.min.js',
     cubism5Path: 'https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js',
     modelId: 0,
-    tools: isLocal
-      ? ['hitokoto', 'asteroids', 'switch-model', 'switch-texture', 'photo', 'info', 'quit']
-      : ['hitokoto', 'asteroids', 'photo', 'info', 'quit'],
+    tools: ['hitokoto', 'asteroids', 'switch-texture', 'photo', 'info', 'quit'],
     logLevel: isLocal ? 'info' : 'warn',
     drag: false,
   });
