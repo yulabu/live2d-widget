@@ -14,6 +14,7 @@ const repoBase = (() => {
   const idx = src.indexOf('/dist/');
   return idx >= 0 ? src.substring(0, idx) : '';
 })();
+const isLocal = location.hostname === 'localhost' || location.protocol === 'file:';
 
 // Set canvas CSS size based on device pixel ratio
 // 800px buffer mapped 1:1 to physical pixels on HiDPI screens
@@ -91,8 +92,10 @@ function loadExternalResource(url, type) {
     cubism2Path: live2d_path + 'live2d.min.js',
     cubism5Path: 'https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js',
     modelId: 0,
-    tools: ['hitokoto', 'asteroids', 'switch-model', 'switch-texture', 'photo', 'info', 'quit'],
-    logLevel: 'info',
+    tools: isLocal
+      ? ['hitokoto', 'asteroids', 'switch-model', 'switch-texture', 'photo', 'info', 'quit']
+      : ['hitokoto', 'asteroids', 'photo', 'info', 'quit'],
+    logLevel: isLocal ? 'info' : 'warn',
     drag: false,
   });
 })();
