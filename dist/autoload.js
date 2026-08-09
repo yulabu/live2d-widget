@@ -15,6 +15,13 @@ const repoBase = (() => {
   return idx >= 0 ? src.substring(0, idx) : '';
 })();
 
+// Set canvas CSS size based on device pixel ratio
+// 800px buffer mapped 1:1 to physical pixels on HiDPI screens
+document.documentElement.style.setProperty(
+  '--live2d-size',
+  `${800 / (window.devicePixelRatio || 1)}px`
+);
+
 // Method to encapsulate asynchronous resource loading
 // 封装异步加载资源的方法
 function loadExternalResource(url, type) {

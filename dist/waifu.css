@@ -78,9 +78,9 @@
 
 #live2d {
 	cursor: grab;
-	height: 300px;
+	height: var(--live2d-size, 400px) !important;
 	position: relative;
-	width: 300px;
+	width: var(--live2d-size, 400px) !important;
 }
 
 #live2d:active {
