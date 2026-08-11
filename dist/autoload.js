@@ -20,7 +20,7 @@ const isLocal = location.hostname === 'localhost' || location.protocol === 'file
 // 800px buffer mapped 1:1 to physical pixels on HiDPI screens
 document.documentElement.style.setProperty(
   '--live2d-size',
-  `${800 / (window.devicePixelRatio || 1)}px`
+     `${480 / (window.devicePixelRatio || 1)}px`
 );
 
 // Method to encapsulate asynchronous resource loading
@@ -94,7 +94,7 @@ function loadExternalResource(url, type) {
     modelId: 0,
     tools: ['hitokoto', 'asteroids', 'switch-texture', 'photo', 'info', 'quit'],
     logLevel: isLocal ? 'info' : 'warn',
-    drag: false,
+    drag: true,
   });
 })();
 
