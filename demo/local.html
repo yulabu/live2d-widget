@@ -115,6 +115,22 @@
 
       panel.classList.add('ready');
 
+      window.waifuRefreshCanvas = function() {
+        const m = window.waifuModel;
+        if (!m) return;
+        const canvas = document.getElementById('live2d');
+        if (!canvas) return;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(400 * dpr);
+        canvas.height = Math.round(400 * dpr);
+        if (m.cubism5model) {
+          try {
+            const sub = m.cubism5model.subdelegates.at(0);
+            if (sub && typeof sub.onResize === 'function') sub.onResize();
+          } catch(e) {}
+        }
+      };
+
       panel.addEventListener('click', function(e) {
         const btn = e.target.closest('button[data-expr]');
         if (!btn) return;

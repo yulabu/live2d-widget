@@ -16,12 +16,44 @@ const repoBase = (() => {
 })();
 const isLocal = location.hostname === 'localhost' || location.protocol === 'file:';
 
-// Set canvas CSS size based on device pixel ratio
-// 800px buffer mapped 1:1 to physical pixels on HiDPI screens
-document.documentElement.style.setProperty(
-  '--live2d-size',
-     `${480 / (window.devicePixelRatio || 1)}px`
-);
+// Set canvas CSS size to 400px display, internal res = 400 * dpr for 1:1 pixels
+document.documentElement.style.setProperty('--live2d-size', '400px');
+(function() {
+  const targetSize = 400;
+  const observer = new MutationObserver(function(mutations) {
+    for (let i = 0; i < mutations.length; i++) {
+      const added = mutations[i].addedNodes;
+      for (let j = 0; j < added.length; j++) {
+        const node = added[j];
+        if (node.id === 'live2d') {
+          setCanvasSize(node);
+          return;
+        }
+        if (node.querySelector) {
+          const canvas = node.querySelector('#live2d');
+          if (canvas) { setCanvasSize(canvas); return; }
+        }
+      }
+    }
+  });
+  function setCanvasSize(canvas) {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(targetSize * dpr);
+    canvas.height = Math.round(targetSize * dpr);
+    observer.disconnect();
+  }
+  observer.observe(document.body, { childList: true, subtree: true });
+})();
+let _waifuDPR = window.devicePixelRatio || 1;
+window.addEventListener('resize', function() {
+  const dpr = window.devicePixelRatio || 1;
+  if (dpr !== _waifuDPR) {
+    _waifuDPR = dpr;
+    if (typeof window.waifuRefreshCanvas === 'function') {
+      window.waifuRefreshCanvas();
+    }
+  }
+});
 
 // Method to encapsulate asynchronous resource loading
 // 封装异步加载资源的方法
