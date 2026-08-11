@@ -7,6 +7,15 @@
 		],
 		"Physics": "Nahida.physics3.json",
 		"DisplayInfo": "Nahida.cdi3.json",
+		"Motions": {
+			"Idle": [
+				{
+					"File": "StandbyAnimation.motion3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				}
+			]
+		},
 		"Expressions": [
 			{
 				"Name": "guang.exp3.json",

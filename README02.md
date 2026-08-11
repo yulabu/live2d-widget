@@ -151,22 +151,25 @@ npx serve .
 
 ## 5. 部署到博客
 
-### 部署流程
+本地调试确认 OK 后，执行以下全部命令：
 
 ```powershell
-# 1. 本地调试确认 OK 后提交
 git add -A
-git commit -m "描述改动"
-
-# 2. 更新 tag（生产版靠 tag 识别，不是 master 分支）
+git commit -m "描述这次改了什么"
 git tag -f v1.0.0
 git push
 git push --tags -f
 ```
 
-### CDN 缓存手动刷新
+| 命令 | 作用 |
+|---|---|
+| `git add -A` | 暂存所有改动 |
+| `git commit -m "..."` | 提交，写上改动描述 |
+| `git tag -f v1.0.0` | 把 `v1.0.0` 标签强制指向最新 commit |
+| `git push` | 推送代码到 GitHub |
+| `git push --tags -f` | 推送 / 更新标签（jsDelivr 靠标签版本号识别更新） |
 
-如果等了 2 分钟博客还没更新：
+等 1-2 分钟 CDN 自动同步。如果博客迟迟不更新，浏览器打开以下地址手动刷新 CDN 缓存：
 
 ```
 https://purge.jsdelivr.net/gh/yulabu/live2d-widget@v1.0.0/dist/autoload.js
@@ -184,7 +187,7 @@ https://purge.jsdelivr.net/gh/yulabu/live2d-widget@v1.0.0/dist/autoload.js
 |---|---|---|
 | 路径检测 | `document.currentScript` 自动 | 同 |
 | 模型路径 | repoBase 动态补全 | 同 |
-| 工具栏 | 7 个 | 5 个 |
+| 工具栏 | 6 个（含 switch-texture） | 同 |
 | 日志 | `info` | `warn` |
 | 文件 | `dist/autoload.js` | **同一个文件** |
 
@@ -195,4 +198,3 @@ https://purge.jsdelivr.net/gh/yulabu/live2d-widget@v1.0.0/dist/autoload.js
 | 问题 | 原因 | 方案 |
 |---|---|---|
 | 加载慢（~18 MB） | 8192px 纹理 14.6 MB | 缩纹理至 2048px |
-| 代码冗余 | waifu-tips.json 含 4 个无关模型 | 删掉 Pio/Tia/Neptunia/Hiyori |
