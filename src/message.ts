@@ -18,7 +18,7 @@ type Time = {
   text: string;
 }[];
 
-let messageTimer: NodeJS.Timeout | null = null;
+let messageTimer: ReturnType<typeof setTimeout> | null = null;
 
 /**
  * Display waifu message.

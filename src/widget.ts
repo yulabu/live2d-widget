@@ -201,6 +201,7 @@ async function loadWidget(config: Config) {
   new ToolsManager(model, config, tips).registerTools();
   if (config.drag) registerDrag();
   document.getElementById('waifu')?.classList.add('waifu-active');
+  (window as any).waifuModel = model;
 }
 
 /**

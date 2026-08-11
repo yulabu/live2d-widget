@@ -2,9 +2,131 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Live2D 本地调试</title>
+<title>Live2D 本地调试 — 表情预览</title>
+<style>
+  #expr-panel {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 9999;
+    background: rgba(255,255,255,.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.15);
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    display: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 320px;
+  }
+  #expr-panel.ready { display: flex; }
+  #expr-panel span {
+    width: 100%;
+    margin-bottom: 2px;
+    font-weight: 600;
+    color: #333;
+  }
+  #expr-panel button {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #f8f8f8;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background .2s;
+  }
+  #expr-panel button:hover {
+    background: #c8e6c9;
+    border-color: #81c784;
+  }
+  #expr-panel button.active {
+    background: #4caf50;
+    color: #fff;
+    border-color: #388e3c;
+  }
+</style>
 </head>
 <body>
+<div id="expr-panel">
+  <span>表情预览</span>
+  <button data-expr="guang">光</button>
+  <button data-expr="hei">嘿</button>
+  <button data-expr="lei">泪</button>
+  <button data-expr="lh">脸红</button>
+  <button data-expr="sq">生气</button>
+  <button data-expr="xx">星星</button>
+  <button data-expr="yz">严肃</button>
+  <button data-expr="zs1">注视1</button>
+  <button data-expr="zs2">注视2</button>
+  <button data-expr="zs3">注视3</button>
+</div>
+<script>
+  (function() {
+    const panel = document.getElementById('expr-panel');
+
+    function setupExpressionPanel() {
+      const model = window.waifuModel;
+      if (!model) return setTimeout(setupExpressionPanel, 300);
+
+      model.getExpressionIds = function() {
+        let modelSetting = null;
+        if (this.useCDN && this.modelList) {
+          let modelName = this.modelList.models[this.modelId];
+          if (Array.isArray(modelName)) modelName = modelName[this.modelTexturesId];
+          const path = this.cdnPath + 'model/' + modelName + '/index.json';
+          modelSetting = this.modelJSONCache[path];
+        } else if (this.models && this.models.length) {
+          const path = this.models[this.modelId].paths[this.modelTexturesId];
+          modelSetting = this.modelJSONCache[path];
+        }
+        if (modelSetting && modelSetting.FileReferences && modelSetting.FileReferences.Expressions) {
+          return modelSetting.FileReferences.Expressions.map(function(e) { return e.Name; });
+        }
+        return [];
+      };
+
+      model.setExpression = function(name) {
+        const ids = this.getExpressionIds();
+        let match = null;
+        for (let i = 0; i < ids.length; i++) {
+          if (ids[i] === name || ids[i].replace(/\.exp3\.json$/i, '') === name) {
+            match = ids[i];
+            break;
+          }
+        }
+        const expressionId = match || name;
+        if (this.cubism5model) {
+          try {
+            const sub = this.cubism5model.subdelegates.at(0);
+            const m = sub.getLive2DManager()._models.at(0);
+            if (m && typeof m.setExpression === 'function') {
+              m.setExpression(expressionId);
+              return;
+            }
+          } catch(e) {}
+        }
+        if (this.cubism2model && typeof this.cubism2model.setExpression === 'function') {
+          this.cubism2model.setExpression(expressionId);
+        }
+      };
+
+      panel.classList.add('ready');
+
+      panel.addEventListener('click', function(e) {
+        const btn = e.target.closest('button[data-expr]');
+        if (!btn) return;
+        window.waifuModel.setExpression(btn.dataset.expr);
+        panel.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+      });
+    }
+
+    setupExpressionPanel();
+  })();
+</script>
 <script src="../dist/autoload.js"></script>
 </body>
 </html>

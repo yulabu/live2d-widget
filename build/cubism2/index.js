@@ -175,7 +175,7 @@ class Cubism2Model {
         }
     }
     modelTurnHead(event) {
-        var _b;
+        var _a;
         if (!this.canvas || !this.dragMgr)
             return;
         const rect = this.canvas.getBoundingClientRect();
@@ -191,12 +191,12 @@ class Cubism2Model {
             ')');
         this.dragMgr.setPoint(vx, vy);
         this.live2DMgr.tapEvent(vx, vy);
-        if ((_b = this.live2DMgr.model) === null || _b === void 0 ? void 0 : _b.hitTest(LAppDefine.HIT_AREA_BODY, vx, vy)) {
+        if ((_a = this.live2DMgr.model) === null || _a === void 0 ? void 0 : _a.hitTest(LAppDefine.HIT_AREA_BODY, vx, vy)) {
             window.dispatchEvent(new Event('live2d:tapbody'));
         }
     }
     followPointer(event) {
-        var _b;
+        var _a;
         if (!this.canvas || !this.dragMgr)
             return;
         const rect = this.canvas.getBoundingClientRect();
@@ -211,13 +211,13 @@ class Cubism2Model {
             vy +
             ')');
         this.dragMgr.setPoint(vx, vy);
-        if ((_b = this.live2DMgr.model) === null || _b === void 0 ? void 0 : _b.hitTest(LAppDefine.HIT_AREA_BODY, vx, vy)) {
+        if ((_a = this.live2DMgr.model) === null || _a === void 0 ? void 0 : _a.hitTest(LAppDefine.HIT_AREA_BODY, vx, vy)) {
             window.dispatchEvent(new Event('live2d:hoverbody'));
         }
     }
     lookFront() {
-        var _b;
-        (_b = this.dragMgr) === null || _b === void 0 ? void 0 : _b.setPoint(0, 0);
+        var _a;
+        (_a = this.dragMgr) === null || _a === void 0 ? void 0 : _a.setPoint(0, 0);
     }
     mouseEvent(e) {
         e.preventDefault();
@@ -275,12 +275,12 @@ class Cubism2Model {
         return this.viewMatrix.invertTransformY(screenY);
     }
     transformScreenX(deviceX) {
-        var _b, _c;
-        return (_c = (_b = this.deviceToScreen) === null || _b === void 0 ? void 0 : _b.transformX(deviceX)) !== null && _c !== void 0 ? _c : 0;
+        var _a, _b;
+        return (_b = (_a = this.deviceToScreen) === null || _a === void 0 ? void 0 : _a.transformX(deviceX)) !== null && _b !== void 0 ? _b : 0;
     }
     transformScreenY(deviceY) {
-        var _b, _c;
-        return (_c = (_b = this.deviceToScreen) === null || _b === void 0 ? void 0 : _b.transformY(deviceY)) !== null && _c !== void 0 ? _c : 0;
+        var _a, _b;
+        return (_b = (_a = this.deviceToScreen) === null || _a === void 0 ? void 0 : _a.transformY(deviceY)) !== null && _b !== void 0 ? _b : 0;
     }
 }
 export default Cubism2Model;

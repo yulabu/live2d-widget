@@ -43,6 +43,8 @@ declare class ModelManager {
     loadTextureCache(modelName: string): Promise<any[]>;
     loadModel(message: string | string[]): Promise<void>;
     loadRandTexture(successMessage?: string | string[], failMessage?: string | string[]): Promise<void>;
+    getExpressionIds(): string[];
+    setExpression(name: string): void;
     loadNextModel(): Promise<void>;
 }
 export { ModelManager, Config, ModelList };

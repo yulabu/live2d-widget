@@ -3,7 +3,7 @@ import { loadExternalResource, randomOtherOption } from './utils.js';
 import logger from './logger.js';
 class ModelManager {
     constructor(config, models = []) {
-        var _b;
+        var _a;
         this.modelList = null;
         let { apiPath, cdnPath } = config;
         const { cubism2Path, cubism5Path } = config;
@@ -29,7 +29,7 @@ class ModelManager {
             modelTexturesId = 0;
         }
         if (isNaN(modelId)) {
-            modelId = (_b = config.modelId) !== null && _b !== void 0 ? _b : 0;
+            modelId = (_a = config.modelId) !== null && _a !== void 0 ? _a : 0;
         }
         this.useCDN = useCDN;
         this.cdnPath = cdnPath || '';
@@ -105,7 +105,7 @@ class ModelManager {
                 const response = await fetch(url);
                 result = await response.json();
             }
-            catch (_b) {
+            catch (_a) {
                 result = null;
             }
             this.modelJSONCache[url] = result;
@@ -246,6 +246,47 @@ class ModelManager {
         }
         else {
             await this.loadModel(successMessage);
+        }
+    }
+    getExpressionIds() {
+        var _a;
+        let modelSetting = null;
+        if (this.useCDN) {
+            const modelName = this.modelList.models[this.modelId];
+            const modelSettingPath = `${this.cdnPath}model/${modelName}/index.json`;
+            modelSetting = this.modelJSONCache[modelSettingPath];
+        }
+        else if (this.models.length) {
+            const modelSettingPath = this.models[this.modelId].paths[this.modelTexturesId];
+            modelSetting = this.modelJSONCache[modelSettingPath];
+        }
+        if ((_a = modelSetting === null || modelSetting === void 0 ? void 0 : modelSetting.FileReferences) === null || _a === void 0 ? void 0 : _a.Expressions) {
+            return modelSetting.FileReferences.Expressions.map((e) => e.Name);
+        }
+        return [];
+    }
+    setExpression(name) {
+        var _a, _b, _c, _d;
+        const ids = this.getExpressionIds();
+        const match = ids.find((id) => id === name || id.replace(/\.exp3\.json$/i, '') === name);
+        const expressionId = match || name;
+        if (!this.cubism5model && !this.cubism2model)
+            return;
+        try {
+            if (this.currentModelVersion === 3 && this.cubism5model) {
+                const sub = (_a = this.cubism5model.subdelegates) === null || _a === void 0 ? void 0 : _a.at(0);
+                const model = (_d = (_c = (_b = sub === null || sub === void 0 ? void 0 : sub.getLive2DManager) === null || _b === void 0 ? void 0 : _b.call(sub)) === null || _c === void 0 ? void 0 : _c._models) === null || _d === void 0 ? void 0 : _d.at(0);
+                if (model && typeof model.setExpression === 'function') {
+                    model.setExpression(expressionId);
+                    return;
+                }
+            }
+            if (this.cubism2model && typeof this.cubism2model.setExpression === 'function') {
+                this.cubism2model.setExpression(expressionId);
+            }
+        }
+        catch (e) {
+            logger.warn(`setExpression("${name}") failed:`, e);
         }
     }
     async loadNextModel() {

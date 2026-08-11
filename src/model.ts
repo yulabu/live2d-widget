@@ -255,7 +255,7 @@ class ModelManager {
           this.resetCanvas();
         }
         if (this.currentModelVersion === 2 || !this.cubism5model.subdelegates.at(0)) {
-          this.cubism5model.initialize();
+          (this.cubism5model as any).initialize();
           this.cubism5model.changeModel(modelSettingPath);
           this.cubism5model.run();
         } else {
@@ -342,6 +342,46 @@ class ModelManager {
       showMessage(failMessage, 4000, 10);
     } else {
       await this.loadModel(successMessage);
+    }
+  }
+
+  getExpressionIds(): string[] {
+    let modelSetting: any = null;
+    if (this.useCDN) {
+      const modelName = this.modelList.models[this.modelId];
+      const modelSettingPath = `${this.cdnPath}model/${modelName}/index.json`;
+      modelSetting = this.modelJSONCache[modelSettingPath];
+    } else if (this.models.length) {
+      const modelSettingPath = this.models[this.modelId].paths[this.modelTexturesId];
+      modelSetting = this.modelJSONCache[modelSettingPath];
+    }
+    if (modelSetting?.FileReferences?.Expressions) {
+      return modelSetting.FileReferences.Expressions.map((e: any) => e.Name);
+    }
+    return [];
+  }
+
+  setExpression(name: string) {
+    const ids = this.getExpressionIds();
+    const match = ids.find((id: string) =>
+      id === name || id.replace(/\.exp3\.json$/i, '') === name
+    );
+    const expressionId = match || name;
+    if (!this.cubism5model && !this.cubism2model) return;
+    try {
+      if (this.currentModelVersion === 3 && this.cubism5model as any) {
+        const sub = (this.cubism5model as any).subdelegates?.at(0);
+        const model = sub?.getLive2DManager?.()?._models?.at(0);
+        if (model && typeof model.setExpression === 'function') {
+          model.setExpression(expressionId);
+          return;
+        }
+      }
+      if (this.cubism2model && typeof (this.cubism2model as any).setExpression === 'function') {
+        (this.cubism2model as any).setExpression(expressionId);
+      }
+    } catch (e) {
+      logger.warn(`setExpression("${name}") failed:`, e);
     }
   }
 
