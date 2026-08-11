@@ -43,6 +43,10 @@
 	display: none;
 }
 
+#waifu:not(.waifu-active) {
+	pointer-events: none;
+}
+
 #waifu:hover {
 	transform: translateY(20px);
 }

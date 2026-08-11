@@ -124,6 +124,8 @@
             count = 0;
             const waifu = document.getElementById('waifu');
             if (!waifu) return;
+            waifu.style.top = '';
+            waifu.style.left = '';
             waifu.classList.remove('waifu-active');
             if (window.waifuModel) window.waifuModel.setExpression('sq');
             setTimeout(function() {
