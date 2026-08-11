@@ -115,6 +115,36 @@
 
       panel.classList.add('ready');
 
+      (function tapHide() {
+        let count = 0, timer = null;
+        window.addEventListener('live2d:tapbody', function() {
+          count++;
+          if (timer) clearTimeout(timer);
+          if (count >= 3) {
+            count = 0;
+            const waifu = document.getElementById('waifu');
+            if (!waifu) return;
+            waifu.classList.remove('waifu-active');
+            if (window.waifuModel) window.waifuModel.setExpression('sq');
+            setTimeout(function() {
+              const m = window.waifuModel;
+              if (m && m.cubism5model) {
+                try {
+                  const model = m.cubism5model.subdelegates.at(0)
+                    .getLive2DManager()._models.at(0);
+                  ['42','43','44','54','55','56','57','58','59','60'].forEach(function(id) {
+                    try { model.setParameterValueById('Param' + id, 0); } catch(e) {}
+                  });
+                } catch(e) {}
+              }
+              waifu.classList.add('waifu-active');
+            }, 15000);
+          } else {
+            timer = setTimeout(function() { count = 0; }, 2000);
+          }
+        });
+      })();
+
       window.waifuRefreshCanvas = function() {
         const m = window.waifuModel;
         if (!m) return;

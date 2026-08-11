@@ -126,7 +126,7 @@ function loadExternalResource(url, type) {
     modelId: 0,
     tools: ['hitokoto', 'asteroids', 'switch-texture', 'photo', 'info', 'quit'],
     logLevel: isLocal ? 'info' : 'warn',
-    drag: true,
+    drag: false,
   });
 })();
 
