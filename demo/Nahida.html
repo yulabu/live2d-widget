@@ -47,6 +47,9 @@
     color: #fff;
     border-color: #388e3c;
   }
+  #waifu-tool .waifu-expr-btn.active svg {
+    fill: #4caf50;
+  }
 </style>
 </head>
 <body>
@@ -114,6 +117,65 @@
       };
 
       panel.classList.add('ready');
+
+      (function buildExprTools() {
+        const tool = document.getElementById('waifu-tool');
+        if (!tool) return setTimeout(buildExprTools, 200);
+        const quitBtn = document.getElementById('waifu-tool-quit');
+        const exprs = [
+          { id: 'guang', label: '光' },
+          { id: 'hei',   label: '嘿' },
+          { id: 'lei',   label: '泪' },
+          { id: 'lh',    label: '脸红' },
+          { id: 'sq',    label: '生气' },
+          { id: 'xx',    label: '星星' },
+          { id: 'yz',    label: '严肃' },
+          { id: 'zs1',   label: '注1' },
+          { id: 'zs2',   label: '注2' },
+          { id: 'zs3',   label: '注3' },
+          { id: null,    label: '重置' },
+        ];
+        function clearActive() {
+          tool.querySelectorAll('.waifu-expr-btn').forEach(function(b) {
+            b.classList.remove('active');
+          });
+          panel.querySelectorAll('button').forEach(function(b) {
+            b.classList.remove('active');
+          });
+        }
+        function resetExpr() {
+          if (!window.waifuModel || !window.waifuModel.cubism5model) return;
+          try {
+            var m = window.waifuModel.cubism5model.subdelegates.at(0)
+              .getLive2DManager()._models.at(0);
+            ['42','43','44','54','55','56','57','58','59','60'].forEach(function(id) {
+              try { m.setParameterValueById('Param' + id, 0); } catch(e) {}
+            });
+          } catch(e) {}
+          clearActive();
+        }
+        exprs.forEach(function(ex) {
+          var span = document.createElement('span');
+          span.className = 'waifu-expr-btn';
+          span.title = ex.label;
+          span.innerHTML = ex.id === null
+            ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M463 192H315.9L271.2 58.6C269 52.1 262.9 48 256 48s-13 4.1-15.2 10.6L196.1 192H49c-9.4 0-17 7.6-17 17s7.6 17 17 17h138.1l-36.6 110.9c-3.7 11.1 2.3 23.1 13.4 26.8s23.1-2.3 26.8-13.4L230.1 258h51.8l39.4 92.3c3.7 11.1 15.7 17.1 26.8 13.4s17.1-15.7 13.4-26.8L325.4 258H463c9.4 0 17-7.6 17-17s-7.6-17-17-17z"/></svg>'
+            : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"/></svg>';
+          span.addEventListener('click', function() {
+            if (ex.id === null) { resetExpr(); return; }
+            window.waifuModel.setExpression(ex.id);
+            clearActive();
+            span.classList.add('active');
+            var panelBtn = panel.querySelector('button[data-expr="' + ex.id + '"]');
+            if (panelBtn) panelBtn.classList.add('active');
+          });
+          if (quitBtn) {
+            tool.insertBefore(span, quitBtn);
+          } else {
+            tool.appendChild(span);
+          }
+        });
+      })();
 
       (function tapHide() {
         let count = 0, timer = null;
