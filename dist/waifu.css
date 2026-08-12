@@ -122,6 +122,10 @@
 	fill: #0684bd; /* #34495e */
 }
 
+#waifu-tool .waifu-expr-btn.active svg {
+	fill: #4caf50;
+}
+
 @keyframes waifu-shake {
 	2% {
 		transform: translate(.5px, -1.5px) rotate(-.5deg);
