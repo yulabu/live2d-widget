@@ -1,8 +1,9 @@
-package-lock.json
 node_modules/
 .DS_Store
 .idea/
 .vscode/
 backup/
 src/CubismSdkForWeb-*/
-build/CubismSdkForWeb-*/
+build/
+dist/
+model/Nahida-compact/

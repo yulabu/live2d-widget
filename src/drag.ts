@@ -1,5 +1,12 @@
+/**
+ * @file Drag support for the waifu widget.
+ * @module drag
+ */
+
+import ui from './ui/index.js';
+
 function registerDrag() {
-  const element = document.getElementById('waifu');
+  const element = ui.getWidget();
   if (!element) return;
   let winWidth = window.innerWidth,
     winHeight = window.innerHeight;
@@ -11,7 +18,7 @@ function registerDrag() {
       // Right mouse button, just return, do not handle
       return;
     }
-    const canvas = document.getElementById('live2d');
+    const canvas = ui.getCanvas();
     if (event.target !== canvas) return;
     event.preventDefault();
     // Record the coordinates of the cursor when pressing down on the image

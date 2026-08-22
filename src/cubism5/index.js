@@ -6,6 +6,7 @@ import * as LAppDefine from '@demo/lappdefine.js';
 import { LAppModel } from '@demo/lappmodel.js';
 import { LAppPal } from '@demo/lapppal';
 import logger from '../logger.js';
+import ui from '../ui/index.js';
 
 LAppPal.printMessage = () => {};
 
@@ -245,7 +246,7 @@ export class AppDelegate extends LAppDelegate {
     this._subdelegates.prepareCapacity(LAppDefine.CanvasNum);
 
     // Get the live2d canvas element from the page
-    const canvas = document.getElementById('live2d');
+    const canvas = ui.getCanvas();
     this._canvases.pushBack(canvas);
 
     // Set canvas style size to match actual size
@@ -295,5 +296,23 @@ export class AppDelegate extends LAppDelegate {
 
   get subdelegates() {
     return this._subdelegates;
+  }
+
+  /**
+   * Reset the given parameters (by numeric id suffix, e.g. '42' matches
+   * 'Param42') to 0. Used to undo pose leftovers after hiding the model.
+   * @param {string[]} parameterIds - Parameter id suffixes.
+   */
+  resetParameters(parameterIds) {
+    const sub = this._subdelegates?.at(0);
+    const model = sub?.getLive2DManager?.()?._models?.at(0);
+    if (!model || typeof model.setParameterValueById !== 'function') return;
+    for (const id of parameterIds) {
+      try {
+        model.setParameterValueById('Param' + id, 0);
+      } catch (error) {
+        logger.warn(`resetParameters("Param${id}") failed:`, error);
+      }
+    }
   }
 }

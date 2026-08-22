@@ -3,12 +3,16 @@ name: Linter
 on: [push, pull_request]
 
 jobs:
-  linter:
+  check:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
     - name: Use Node.js
       uses: actions/setup-node@v6
+      with:
+        node-version: 25
     - name: Install Dependencies
-      run: npm install
-    - run: npm run eslint
+      run: npm ci
+    - name: Download Cubism SDK
+      run: npm run setup
+    - run: npm run check

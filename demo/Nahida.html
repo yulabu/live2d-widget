@@ -1,63 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <title>Nahida 调试</title>
 </head>
 <body>
-<script>
-  (function() {
-    function tapHide() {
-      let count = 0, timer = null;
-      window.addEventListener('live2d:tapbody', function() {
-        count++;
-        if (timer) clearTimeout(timer);
-        if (count >= 3) {
-          count = 0;
-          var waifu = document.getElementById('waifu');
-          if (!waifu) return;
-          waifu.style.top = '';
-          waifu.style.left = '';
-          waifu.classList.remove('waifu-active');
-          if (window.waifuModel) window.waifuModel.setExpression('sq');
-          setTimeout(function() {
-            var m = window.waifuModel;
-            if (m && m.cubism5model) {
-              try {
-                var model = m.cubism5model.subdelegates.at(0)
-                  .getLive2DManager()._models.at(0);
-                ['42','43','44','54','55','56','57','58','59','60'].forEach(function(id) {
-                  try { model.setParameterValueById('Param' + id, 0); } catch(e) {}
-                });
-              } catch(e) {}
-            }
-            waifu.classList.add('waifu-active');
-          }, 15000);
-        } else {
-          timer = setTimeout(function() { count = 0; }, 2000);
-        }
-      });
-    }
-
-    window.waifuRefreshCanvas = function() {
-      var m = window.waifuModel;
-      if (!m) return;
-      var canvas = document.getElementById('live2d');
-      if (!canvas) return;
-      var dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.round(400 * dpr);
-      canvas.height = Math.round(400 * dpr);
-      if (m.cubism5model) {
-        try {
-          var sub = m.cubism5model.subdelegates.at(0);
-          if (sub && typeof sub.onResize === 'function') sub.onResize();
-        } catch(e) {}
-      }
-    };
-
-    tapHide();
-  })();
-</script>
+<!--
+  调试入口:本地运行 `npm run dev` 后访问 http://127.0.0.1:5173/
+  三连击隐藏、DPR 重建画布、隐藏后参数重置等行为已内置在引擎中,
+  由 widget.config.json 的 tapCountHide 等选项控制,此处无需任何脚本。
+-->
 <script src="../dist/autoload.js"></script>
 </body>
 </html>

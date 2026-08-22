@@ -4,6 +4,7 @@
  */
 
 import { randomSelection } from './utils.js';
+import ui from './ui/index.js';
 
 type Time = {
   /**
@@ -49,12 +50,10 @@ function showMessage(
   }
   text = randomSelection(text) as string;
   sessionStorage.setItem('waifu-message-priority', String(priority));
-  const tips = document.getElementById('waifu-tips')!;
-  tips.innerHTML = text;
-  tips.classList.add('waifu-tips-active');
+  ui.showMessage(text);
   messageTimer = setTimeout(() => {
     sessionStorage.removeItem('waifu-message-priority');
-    tips.classList.remove('waifu-tips-active');
+    ui.hideMessage();
   }, timeout);
 }
 

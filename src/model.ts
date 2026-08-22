@@ -8,6 +8,7 @@ import { loadExternalResource, randomOtherOption } from './utils.js';
 import type Cubism2Model from './cubism2/index.js';
 import type { AppDelegate as Cubism5Model } from './cubism5/index.js';
 import logger, { LogLevel } from './logger.js';
+import ui from './ui/index.js';
 
 interface ModelListCDN {
   messages: string[];
@@ -18,6 +19,29 @@ interface ModelList {
   name: string;
   paths: string[];
   message: string;
+}
+
+interface TapCountHide {
+  /**
+   * Number of taps on the body that trigger the hide animation.
+   * @type {number | undefined}
+   */
+  count?: number;
+  /**
+   * Expression to play when hiding.
+   * @type {string | undefined}
+   */
+  expression?: string;
+  /**
+   * How long the widget stays hidden before coming back (ms).
+   * @type {number | undefined}
+   */
+  hideDuration?: number;
+  /**
+   * Parameter ids to reset when showing again (e.g. '42' resets 'Param42').
+   * @type {string[] | undefined}
+   */
+  resetParameters?: string[];
 }
 
 interface Config {
@@ -67,6 +91,22 @@ interface Config {
    * @type {boolean | undefined}
    */
   showToggleAfterQuit?: boolean;
+  /**
+   * Always start from the configured default model, ignoring any persisted
+   * model selection in localStorage.
+   * @type {boolean | undefined}
+   */
+  forceDefaultModel?: boolean;
+  /**
+   * Tap-the-body N times to hide the widget for a while (Nahida easter egg).
+   * @type {TapCountHide | undefined}
+   */
+  tapCountHide?: TapCountHide;
+  /**
+   * Display size of the canvas in CSS pixels.
+   * @type {number | undefined}
+   */
+  size?: number;
   /**
    * Log level.
    * @type {LogLevel | undefined}
@@ -187,7 +227,21 @@ class ModelManager {
   }
 
   resetCanvas() {
-    document.getElementById('waifu-canvas').innerHTML = '<canvas id="live2d" width="800" height="800"></canvas>';
+    ui.resetCanvas();
+  }
+
+  /**
+   * Rebuild the WebGL viewport after the canvas buffer changed
+   * (e.g. device pixel ratio change).
+   */
+  refreshCanvas() {
+    if (this.currentModelVersion === 3 && this.cubism5model) {
+      try {
+        (this.cubism5model as any).subdelegates?.at(0)?.onResize?.();
+      } catch (error) {
+        logger.warn('refreshCanvas failed:', error);
+      }
+    }
   }
 
   async fetchWithCache(url: string) {
@@ -382,6 +436,17 @@ class ModelManager {
       }
     } catch (e) {
       logger.warn(`setExpression("${name}") failed:`, e);
+    }
+  }
+
+  /**
+   * Reset the given parameters (numeric id suffixes, e.g. '42' → 'Param42')
+   * to 0 on the current Cubism 5 model.
+   * @param {string[]} parameterIds - Parameter id suffixes.
+   */
+  resetParameters(parameterIds: string[]) {
+    if (this.currentModelVersion === 3 && this.cubism5model) {
+      (this.cubism5model as any).resetParameters?.(parameterIds);
     }
   }
 

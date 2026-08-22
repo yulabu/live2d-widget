@@ -1,0 +1,24 @@
+{
+  "tools": [
+    "hitokoto",
+    "asteroids",
+    "switch-model",
+    "switch-texture",
+    "photo",
+    "info",
+    "quit"
+  ],
+  "logLevel": "info",
+  "size": 400,
+  "drag": false,
+  "showToggleAfterQuit": true,
+  "forceDefaultModel": true,
+  "tapCountHide": {
+    "count": 3,
+    "expression": "sq",
+    "hideDuration": 15000,
+    "resetParameters": ["42", "43", "44", "54", "55", "56", "57", "58", "59", "60"]
+  },
+  "cubism2Path": "live2d.min.js",
+  "cubism5Path": "https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"
+}

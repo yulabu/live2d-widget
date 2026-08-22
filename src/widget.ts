@@ -9,7 +9,7 @@ import { randomSelection } from './utils.js';
 import { ToolsManager } from './tools.js';
 import logger from './logger.js';
 import registerDrag from './drag.js';
-import { fa_child } from './icons.js';
+import ui from './ui/index.js';
 
 const WAIFU_DISABLED_KEY = 'waifu-disabled';
 
@@ -177,16 +177,13 @@ function registerEventListener(tips: Tips) {
 async function loadWidget(config: Config) {
   localStorage.removeItem('waifu-display');
   sessionStorage.removeItem('waifu-message-priority');
-  document.body.insertAdjacentHTML(
-    'beforeend',
-    `<div id="waifu">
-       <div id="waifu-tips"></div>
-       <div id="waifu-canvas">
-         <canvas id="live2d" width="800" height="800"></canvas>
-       </div>
-       <div id="waifu-tool"></div>
-     </div>`,
-  );
+  ui.mount();
+  ui.setupCanvas({
+    size: config.size ?? 400,
+    onRefresh: () => {
+      (window as any).waifuModel?.refreshCanvas?.();
+    },
+  });
   let models: ModelList[] = [];
   let tips: Tips | null;
   if (config.waifuPath) {
@@ -198,10 +195,47 @@ async function loadWidget(config: Config) {
   }
   const model = await ModelManager.initCheck(config, models);
   await model.loadModel('');
+  registerTapCountHide(model, config);
   new ToolsManager(model, config, tips).registerTools();
   if (config.drag) registerDrag();
-  document.getElementById('waifu')?.classList.add('waifu-active');
+  ui.setWidgetState('active');
   (window as any).waifuModel = model;
+}
+
+/**
+ * Nahida easter egg: tap the body N times to hide the widget for a while,
+ * then come back (with leftover pose parameters reset).
+ * @param {ModelManager} model - Model manager.
+ * @param {Config} config - Waifu configuration.
+ */
+function registerTapCountHide(model: ModelManager, config: Config) {
+  const options = config.tapCountHide;
+  if (!options) return;
+  const {
+    count = 3,
+    expression,
+    hideDuration = 15000,
+    resetParameters = [],
+  } = options;
+  let tapCount = 0;
+  let tapTimer: any = null;
+  window.addEventListener('live2d:tapbody', () => {
+    tapCount++;
+    if (tapTimer) clearTimeout(tapTimer);
+    if (tapCount >= count) {
+      tapCount = 0;
+      ui.slideOut();
+      if (expression) model.setExpression(expression);
+      setTimeout(() => {
+        model.resetParameters(resetParameters);
+        ui.setWidgetState('active');
+      }, hideDuration);
+    } else {
+      tapTimer = setTimeout(() => {
+        tapCount = 0;
+      }, 2000);
+    }
+  });
 }
 
 /**
@@ -217,33 +251,30 @@ function initWidget(config: string | Config) {
     return;
   }
   logger.setLevel(config.logLevel);
-  document.body.insertAdjacentHTML(
-    'beforeend',
-    `<div id="waifu-toggle">
-       ${fa_child}
-     </div>`,
-  );
-  const toggle = document.getElementById('waifu-toggle');
-  toggle?.addEventListener('click', () => {
-    toggle?.classList.remove('waifu-toggle-active');
-    if (toggle?.getAttribute('first-time')) {
+  if (config.forceDefaultModel) {
+    // Always start from the configured default model, ignoring any
+    // previously persisted model selection.
+    localStorage.removeItem('modelId');
+    localStorage.removeItem('modelTexturesId');
+  }
+  const toggle = ui.mountToggle();
+  toggle.addEventListener('click', () => {
+    ui.setToggleActive(false);
+    if (toggle.getAttribute('first-time')) {
       loadWidget(config as Config);
-      toggle?.removeAttribute('first-time');
+      toggle.removeAttribute('first-time');
     } else {
       localStorage.removeItem('waifu-display');
-      document.getElementById('waifu')?.classList.remove('waifu-hidden');
-      setTimeout(() => {
-        document.getElementById('waifu')?.classList.add('waifu-active');
-      }, 0);
+      ui.setWidgetState('active');
     }
   });
   if (
     localStorage.getItem('waifu-display') &&
     Date.now() - Number(localStorage.getItem('waifu-display')) <= 86400000
   ) {
-    toggle?.setAttribute('first-time', 'true');
+    toggle.setAttribute('first-time', 'true');
     setTimeout(() => {
-      toggle?.classList.add('waifu-toggle-active');
+      ui.setToggleActive(true);
     }, 0);
   } else {
     loadWidget(config as Config);

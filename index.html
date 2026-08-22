@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live2D 看板娘 / Dev</title>
+<link rel="stylesheet" href="/src/ui/waifu.css">
+</head>
+<body>
+<script type="module">
+  import { initWidget } from '/src/widget.ts';
+  import config from '/widget.config.json';
+
+  initWidget({
+    waifuPath: '/src/waifu-tips.json',
+    cubism2Path: '/live2d.min.js',
+    cubism5Path: '/build/CubismSdkForWeb-5-r.4/Core/live2dcubismcore.min.js',
+    modelId: 0,
+    tools: config.tools,
+    logLevel: config.logLevel,
+    size: config.size,
+    drag: config.drag,
+    showToggleAfterQuit: config.showToggleAfterQuit,
+    forceDefaultModel: config.forceDefaultModel,
+    tapCountHide: config.tapCountHide,
+  });
+</script>
+</body>
+</html>

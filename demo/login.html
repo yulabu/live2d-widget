@@ -6,7 +6,7 @@
 <title>看板娘登陆平台</title>
 <link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css">
-<script src="../dist/live2d.min.js"></script>
+<script src="../live2d.min.js"></script>
 <style>
 html, body {
 	height: 100%;
@@ -165,7 +165,7 @@ body {
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  */
-import { Cubism2Model } from "../build/index.js";
+import { Cubism2Model } from "../src/index.ts";
 document.getElementById("text").innerHTML = `<span style="color: cyan;">MIMI</span><span style="color: white;">POWERED</span>`.repeat(10);
 document.getElementById("year").innerText = new Date().getFullYear();
 window.addEventListener("load", () => {

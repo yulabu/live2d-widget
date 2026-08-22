@@ -30,7 +30,7 @@
 如果你是小白，或者只需要最基础的功能，那么只用将这一行代码加入 html 页面的 `head` 或 `body` 中，即可加载看板娘：
 
 ```html
-<script src="https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.1/dist/autoload.js"></script>
+<script src="https://Nahida_moe.pages.dev/autoload.js"></script>
 ```
 
 添加代码的位置取决于你的网站的构建方式。例如，如果你使用的是 [Hexo](https://hexo.io)，那么需要在主题的模版文件中添加以上代码。对于用各种模版引擎生成的页面，修改方法类似。  
@@ -45,15 +45,20 @@
 
 | 选项 | 类型 | 默认值 | 说明 |
 | - | - | - | - |
-| `waifuPath` | `string` | `https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.1/dist/waifu-tips.json` | 看板娘资源路径，可自行修改 |
-| `cdnPath` | `string` | `https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/` | CDN 路径 |
-| `cubism2Path` | `string` | `https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.1/dist/live2d.min.js` | Cubism 2 Core 路径 |
-| `cubism5Path` | `string` | `https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js` | Cubism 5 Core 路径 |
+| `waifuPath` | `string` | `dist/waifu-tips.json` | 看板娘资源路径(消息文本与模型列表) |
+| `cdnPath` | `string` | 无 | 外部模型 API 路径(可选) |
+| `cubism2Path` | `string` | `dist/live2d.min.js` | Cubism 2 Core 路径 |
+| `cubism5Path` | `string` | 官方 CDN | Cubism 5 Core 路径 |
 | `modelId` | `number` | `0` | 默认模型 id |
-| `tools` | `string[]` | 见 `autoload.js` | 加载的小工具按钮 |
+| `tools` | `string[]` | 全部 7 个工具 | 加载的小工具按钮 |
 | `drag` | `boolean` | `false` | 支持拖动看板娘 |
-| `showToggleAfterQuit` | `boolean` | `true` | 点击关闭后是否显示重新唤起按钮；若设为 `false`，则会永久关闭，直到清除本地存储 |
-| `logLevel` | `string` | `error` | 日志等级，支持 `error`，`warn`，`info`，`trace` |
+| `size` | `number` | `400` | 画布显示尺寸(CSS 像素) |
+| `showToggleAfterQuit` | `boolean` | `true` | 点击关闭后是否显示重新唤起按钮 |
+| `forceDefaultModel` | `boolean` | `true` | 每次加载忽略本地缓存,强制使用默认模型 |
+| `tapCountHide` | `object` | `null` | 连点身体 N 次隐藏看板娘一段时间(彩蛋),含 `count`/`expression`/`hideDuration`/`resetParameters` |
+| `logLevel` | `string` | `error` | 日志等级,支持 `error`，`warn`，`info`，`trace` |
+
+本仓库所有行为配置(`tools`、`logLevel`、`size`、`drag`、`tapCountHide` 等)统一维护在根目录 `widget.config.json`,`dist/autoload.js` 由它自动生成,本地调试与部署使用同一份配置。
 
 ## 模型仓库
 
@@ -62,82 +67,108 @@
 
 ## 开发
 
-如果以上「配置」部分提供的选项还不足以满足你的需求，那么你可以自己进行修改。本仓库的目录结构如下：
+本仓库的目录结构如下:
 
-- `src` 目录下包含了各个组件的 TypeScript 源代码，例如按钮和对话框等；
-- `build` 目录下包含了基于 `src` 中源代码构建后的文件（请不要直接修改！）；
-- `dist` 目录下包含了进一步打包后网页直接可用的文件，其中：
-  - `autoload.js` 用于自动加载其它资源，例如样式表等；
-  - `waifu-tips.js` 是由 `build/waifu-tips.js` 自动打包生成的，不建议直接修改；
-  - `waifu.css` 是看板娘的样式表；
-  - `waifu-tips.json` 中定义了触发条件（`selector`，CSS 选择器）和触发时显示的文字（`text`）。  
-    `waifu-tips.json` 中默认的 CSS 选择器规则是对 Hexo 的 [NexT 主题](https://github.com/next-theme/hexo-theme-next) 有效的，为了适用于你自己的网页，可能需要自行修改，或增加新内容。  
-    **警告：`waifu-tips.json` 中的内容可能不适合所有年龄段，或不宜在工作期间访问。在使用时，请自行确保它们是合适的。**
+- `src` — 引擎 TypeScript 源码,其中:
+  - `src/ui/` — **UI 层**(DOM 模板 + 样式 + 契约),引擎只通过 `src/ui/contracts.ts` 定义的接口操作 DOM,与具体样式解耦。**自定义 UI 只需修改此目录,引擎零改动**;
+  - `src/widget.ts` — 初始化与事件监听;
+  - `src/model.ts` — 模型加载管理(Cubism 2 / 5 自动识别);
+  - `src/message.ts` — 气泡消息与优先级;
+  - `src/tools.ts` — 工具栏工具注册表;
+  - `src/cubism2/`、`src/cubism5/` — 两种 Cubism 版本的渲染封装;
+- `src/waifu-tips.json` — 消息文本与模型列表;
+- `widget.config.json` — **唯一行为配置**,本地与部署同源;
+- `scripts/` — 工具脚本(下载 SDK / 生成 autoload / 压缩模型);
+- `dist/` — **构建产物,全部自动生成,不要手动修改**;
+- `model/` — 模型文件;
+- `demo/` — 部署后的示例页面。
 
-要在本地部署本项目的开发测试环境，你需要安装 Node.js 和 npm，然后执行以下命令：
+### 环境准备(仅首次)
+
+需要 Node.js(推荐 25,仓库提供 `.nvmrc` 锁定版本)与 npm。
 
 ```bash
-git clone https://github.com/stevenjoezhang/live2d-widget.git
 npm install
+npm run setup    # 自动下载解压 Cubism SDK for Web 5(受许可限制,SDK 不随仓库分发)
 ```
 
-如果需要使用 Cubism 3 及更新的模型，请单独下载并解压 Cubism SDK for Web 到 `src` 目录下，例如 `src/CubismSdkForWeb-5-r.4`。受 Live2D 许可协议（包括 Live2D Proprietary Software License Agreement 和 Live2D Open Software License Agreement）限制，本项目无法包含 Cubism SDK for Web 的源码。  
-如果只需要使用 Cubism 2 版本的模型，可以跳过此步骤。本仓库使用的代码满足 Live2D 许可协议中 Redistributable Code 相关条款。  
-完成后，使用以下命令进行编译和打包。
+### 本地调试
 
 ```bash
-npm run build
+npm run dev
 ```
 
-`src` 目录中的 TypeScript 代码会被编译到 `build` 目录中，`build` 目录中的代码会被进一步打包到 `dist` 目录中。  
-为了能够兼容 Cubism 2 和 Cubism 3 及更新的模型，并减小代码体积，Cubism Core 及相关的代码会根据检测到的模型版本动态加载。
+一条命令启动 Vite dev server(默认 `http://127.0.0.1:5173/`),HMR 热更新,修改 `src/` 或 `src/ui/waifu.css` 即时生效。模型与 SDK Core 均走本地路径,无需外网。
+
+### 构建与提交前验证
+
+```bash
+npm run check        # 一键验证:tsc 类型检查 + eslint + build,提交前必跑
+npm run build        # 类型检查 + 打包,产出 dist/
+npm run preview      # 本地预览构建产物
+```
+
+`dist/autoload.js` 由 `scripts/gen-autoload.mjs` 根据 `widget.config.json` 生成,并注入当前 git commit hash(部署后浏览器控制台可见 `[Live2D Widget] build <hash>`,可用来确认线上版本),`waifu-tips.js` 由 Vite 打包 —— **dist 中没有任何手改文件**。
+
+### 模型压缩(可选)
+
+本仓库的模型已使用 2048px 纹理(仓库约 5 MB)。如果你拿到了新的高分辨率模型,可以压缩以加快加载:
+
+```bash
+npm run compress-model    # 生成 model/Nahida-compact/(纹理降至 2048px,约 1.5 MB)
+```
+
+注意 `model/Nahida-compact/` 为生成目录,已在 `.gitignore` 中,CF 云端构建无法访问它 —— 若要用压缩版部署,请**原地替换** `model/Nahida/` 下的纹理文件并提交。
 
 ## 部署
 
-在本地完成了修改后，你可以将修改后的项目部署在自己的服务器上，或者通过 CDN 加载。为了方便自定义有关内容，可以把这个仓库 Fork 一份，然后把修改后的内容通过 git push 到你的仓库中。
+在本地完成修改后,将改动推送到 GitHub,即可自动部署(见下文 Cloudflare Pages)。本地调试与线上部署使用**同一个** `dist/autoload.js` 与同一份 `widget.config.json`,无需手动同步任何配置。
 
-### 使用 jsDelivr CDN
+### 使用 Cloudflare Pages(唯一方式)
 
-如果要通过 jsDelivr 加载 Fork 后的仓库，使用方法对应地变为
+**方式一:面板直连(零配置,推荐)**
+
+1. 在 [Cloudflare Pages](https://pages.cloudflare.com) 创建新项目,连接你的 GitHub 仓库;
+2. 项目名填 `Nahida_moe`,构建命令填 `npm ci && npm run setup && npm run build`,输出目录填 `dist`;
+3. 每次 `git push` 自动构建部署。
+
+**方式二:GitHub Actions**
+
+仓库已附带 `.github/workflows/pages.yml`(项目名已配置为 `Nahida_moe`,Node 25),只需在 GitHub 仓库设置中添加两个 Secrets:`CLOUDFLARE_API_TOKEN`(Pages 权限)与 `CLOUDFLARE_ACCOUNT_ID`,之后每次 `git push` 自动部署。注意两种方式**二选一**,面板直连模式下请删除 `pages.yml` 避免重复部署。
+
+部署完成后,在你的网页中加入一行即可加载看板娘:
 
 ```html
-<script src="https://fastly.jsdelivr.net/gh/username/live2d-widget@latest/autoload.js"></script>
+<script src="https://Nahida_moe.pages.dev/autoload.js"></script>
 ```
 
-将此处的 `username` 替换为你的 GitHub 用户名。为了使 CDN 的内容正常刷新，需要创建新的 git tag 并推送至 GitHub 仓库中，否则此处的 `@latest` 仍然指向更新前的文件。此外 CDN 本身存在缓存，因此改动可能需要一定的时间生效。
+### 如何保证「本地调试结果 = 线上结果」
 
-### 使用 Cloudflare Pages
+本地与线上消费的是**同一份输入**(git 中的源码、`widget.config.json`、`src/waifu-tips.json`、`model/`),执行的是**同一个构建命令**(`npm run build`),依赖由 `package-lock.json` 锁定,Node 版本由 `.nvmrc` 锁定 —— 因此不需要任何手动同步。
 
-也可以使用 Cloudflare Pages 来部署。在 Cloudflare Pages 中创建一个新的项目，选择你 Fork 的仓库。接下来，设置构建命令为 `npm run build`。完成后，Cloudflare Pages 会自动构建并部署你的项目。
+日常迭代流程:
+
+```bash
+# 1. 修改代码,npm run dev 即时预览
+# 2. 一键验证(类型 + lint + 构建)
+npm run check
+# 3. 确认没有遗漏的修改(尤其是 model/、widget.config.json)
+git status
+# 4. 推送,云端自动构建部署
+git add -A && git commit -m "..." && git push
+```
+
+推送后 GitHub Actions 显示绿勾 = 云端构建成功;部署后浏览器控制台会打印 `[Live2D Widget] build <commit hash>`,与本地 `git log -1 --format=%h` 对比即可确认线上是最新代码。
 
 ### Self-host
 
-你也可以直接把这些文件放到服务器上，而不是通过 CDN 加载。
-
-- 可以把修改后的代码仓库克隆到服务器上，或者通过 `ftp` 等方式将本地文件上传到服务器的网站的目录下；
-- 如果你是通过 Hexo 等工具部署的静态博客，请把本项目的代码放在博客源文件目录下（例如 `source` 目录）。重新部署博客时，相关文件就会自动上传到对应的路径下。为了避免这些文件被 Hexo 插件错误地修改，可能需要设置 `skip_render`。
-
-这样，整个项目就可以通过你的域名访问了。不妨试试能否正常地通过浏览器打开 `autoload.js` 和 `live2d.min.js` 等文件，并确认这些文件的内容是完整和正确的。  
-一切正常的话，接下来修改 `autoload.js` 中的常量 `live2d_path` 为 `dist` 目录的 URL 即可。比如说，如果你能够通过
-
-```
-https://example.com/path/to/live2d-widget/dist/live2d.min.js
-```
-
-访问到 `live2d.min.js`，那么就把 `live2d_path` 的值修改为
-
-```
-https://example.com/path/to/live2d-widget/dist/
-```
-
-路径末尾的 `/` 一定要加上。  
-完成后，在你要添加看板娘的界面加入
+把 `dist/` 目录上传到你的服务器即可。在要添加看板娘的界面加入:
 
 ```html
 <script src="https://example.com/path/to/live2d-widget/dist/autoload.js"></script>
 ```
 
-就可以加载了。
+`autoload.js` 会自动探测自身所在目录,加载同目录下的 `waifu.css`、`waifu-tips.js` 等文件;模型路径(以 `/` 开头)会自动补全为仓库根路径,因此可以放在站点的任意子路径下。
 
 ## 鸣谢
 
@@ -213,6 +244,15 @@ Live2D Cubism Components は Live2D Open Software License で提供していま�
 https://www.live2d.com/eula/live2d-open-software-license-agreement_cn.html
 
 ## 更新日志
+
+2025年起,本项目重构了开发与部署流程:
+
+- UI 与引擎解耦:引擎只依赖 `src/ui/contracts.ts` 定义的契约,自定义 UI 只需修改 `src/ui/`;
+- 构建链迁移至 Vite:`npm run dev` 一条命令本地调试(HMR),`npm run build` 全自动产出 `dist/`(含 `autoload.js` 生成、静态资源拷贝),dist 不再有任何手改文件;
+- 行为配置统一到根目录 `widget.config.json`,本地与部署同源;
+- 部署迁移至 Cloudflare Pages(项目 `Nahida_moe`),`git push` 即发布,不再需要手动打 tag 与刷新 CDN;
+- 提供 `npm run compress-model` 纹理压缩脚本,仓库模型已瘦身至 ~5 MB;
+- `npm run check` 一键验证(tsc + eslint + build),`.nvmrc` 锁定 Node 25,`autoload.js` 注入 commit hash 便于核对线上版本。
 
 2020年1月1日起，本项目不再依赖于 jQuery。
 

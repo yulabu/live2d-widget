@@ -15,6 +15,7 @@ import {
 import { showMessage, i18n } from './message.js';
 import type { Config, ModelManager } from './model.js';
 import type { Tips } from './widget.js';
+import ui from './ui/index.js';
 
 const WAIFU_DISABLED_KEY = 'waifu-disabled';
 
@@ -33,7 +34,7 @@ interface Tools {
      * Callback function for the tool.
      * @type {() => void}
      */
-    callback: (message: any) => void;
+    callback: () => void;
   };
 }
 
@@ -95,7 +96,7 @@ class ToolsManager {
         callback: () => {
           const message = tips.message.photo;
           showMessage(message, 6000, 9);
-          const canvas = document.getElementById('live2d') as HTMLCanvasElement;
+          const canvas = ui.getCanvas();
           if (!canvas) return;
           const imageUrl = canvas.toDataURL();
 
@@ -127,16 +128,13 @@ class ToolsManager {
           }
           const message = tips.message.goodbye;
           showMessage(message, 2000, 11);
-          const waifu = document.getElementById('waifu');
-          if (!waifu) return;
-          waifu.classList.remove('waifu-active');
+          ui.slideOut();
           setTimeout(() => {
-            waifu.classList.add('waifu-hidden');
+            ui.setWidgetHidden();
             if (showToggleAfterQuit) {
-              const waifuToggle = document.getElementById('waifu-toggle');
-              waifuToggle?.classList.add('waifu-toggle-active');
+              ui.setToggleActive(true);
             } else {
-              document.getElementById('waifu-toggle')?.remove();
+              ui.removeToggle();
             }
           }, 3000);
         }
@@ -151,16 +149,7 @@ class ToolsManager {
     for (const toolName of this.config.tools) {
       if (this.tools[toolName]) {
         const { icon, callback } = this.tools[toolName];
-        const element = document.createElement('span');
-        element.id = `waifu-tool-${toolName}`;
-        element.innerHTML = icon;
-        document
-          .getElementById('waifu-tool')
-          ?.insertAdjacentElement(
-            'beforeend',
-            element,
-          );
-        element.addEventListener('click', callback);
+        ui.addToolButton(toolName, icon, callback);
       }
     }
   }

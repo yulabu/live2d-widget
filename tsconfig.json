@@ -2,26 +2,28 @@
   "compilerOptions": {
     "target": "es2017",
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "ignoreDeprecations": "6.0",
-    "declaration": true,
-    "rootDir": "src",
-    "outDir": "build",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": false,
     "skipLibCheck": true,
     "removeComments": true,
     "allowJs": true,
+    "noEmit": true,
+    "types": ["vite/client"],
     "paths": {
       "@framework/*": [
-        "./src/CubismSdkForWeb-5-r.4/Framework/src/*"
+        "./build/CubismSdkForWeb-5-r.4/Framework/src/*"
       ],
       "@demo/*": [
-        "./src/CubismSdkForWeb-5-r.4/Samples/TypeScript/Demo/src/*"
+        "./build/CubismSdkForWeb-5-r.4/Samples/TypeScript/Demo/src/*"
       ]
     }
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "build", "dist"]
+  "include": [
+    "src",
+    "build/CubismSdkForWeb-5-r.4/Core/live2dcubismcore.d.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
 }

@@ -1,4 +1,4 @@
-/* global Image, Live2DModelWebGL, document, fetch */
+/* global Image, Live2DModelWebGL, fetch */
 /**
  *
  *  You can modify and use this source freely
@@ -8,6 +8,7 @@
  */
 
 import logger from '../logger.js';
+import ui from '../ui/index.js';
 import type { Live2DModelRuntime } from './types.js';
 //============================================================
 //============================================================
@@ -60,7 +61,7 @@ class PlatformManager {
 
     loadedImage.onload = () => {
       // create texture
-      const canvas = document.getElementById('live2d') as HTMLCanvasElement | null;
+      const canvas = ui.getCanvas();
       if (!canvas) {
         logger.error('Canvas live2d not found.');
         return -1;
